@@ -4,8 +4,8 @@ import { createConnection } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
 import axios from "axios";
 import dayjs from "dayjs";
-import Sentry from "@sentry/node";
-import Tracing from "@sentry/tracing";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 
 const receiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
@@ -45,7 +45,7 @@ const authorizeFn: Authorize<boolean> = async ({ teamId }) => {
 
 // https://app.slack.com/app-settings/T02PUHPD0MN/A02P4RZ9SNN/app-manifest
 const app = new App({
-	token: process.env.SLACK_BOT_TOKEN,
+	// token: process.env.SLACK_BOT_TOKEN,
 	signingSecret: process.env.SLACK_SIGNING_SECRET,
   authorize: authorizeFn,
 	// socketMode:true, // enable the following to use socket mode

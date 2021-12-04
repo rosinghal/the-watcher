@@ -1,1 +1,1 @@
-web: yarn global add ts-node && yarn migrate && yarn prod
+web: yarn global add typescript ts-node && yarn migrate && yarn prod
