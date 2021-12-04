@@ -1,1 +1,1 @@
-web: yarn add ts-node && yarn migrate && yarn prod
+web: yarn migrate && yarn prod
