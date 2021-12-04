@@ -4,8 +4,8 @@ import { createConnection } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
 import axios from "axios";
 import dayjs from "dayjs";
-import * as Sentry from "@sentry/node";
-import * as Tracing from "@sentry/tracing";
+import Sentry from "@sentry/node";
+import Tracing from "@sentry/tracing";
 
 const receiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
