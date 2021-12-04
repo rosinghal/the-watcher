@@ -40,7 +40,13 @@ const express = receiver.router;
 
 express.get("/", (req, res) => {
 	console.log("Redirecting");
-	res.redirect(`${process.env.HOST}/slack/install`);
+	res.redirect(
+		`https://slack.com/oauth/v2/authorize?client_id=${
+			process.env.SLACK_CLIENT_ID
+		}&scope=app_mentions:read,channels:history,commands,groups:history,im:history,im:read,im:write,mpim:history,chat:write&user_scope=&redirect_uri=${
+			String(process.env.HOST) + "/slack/callback"
+		}`
+	);
 	res.end();
 });
 
@@ -110,17 +116,6 @@ app.message(async ({ say, message }) => {
 		console.log("err");
 		console.error(error);
 	}
-});
-
-express.get("/slack/install", async (req, res) => {
-	res.redirect(
-		`https://slack.com/oauth/v2/authorize?client_id=${
-			process.env.SLACK_CLIENT_ID
-		}&scope=app_mentions:read,channels:history,commands,groups:history,im:history,im:read,im:write,mpim:history,chat:write&user_scope=&redirect_uri=${
-			String(process.env.HOST) + "/slack/callback"
-		}`
-	);
-	res.end();
 });
 
 express.get("/slack/callback", async (req, res) => {
