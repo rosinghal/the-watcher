@@ -4,12 +4,29 @@ import { createConnection } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
 import axios from "axios";
 import dayjs from "dayjs";
+import Sentry from "@sentry/node";
+import Tracing from "@sentry/tracing";
 
 const receiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
 });
 
+const express = receiver.router;
 
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Tracing.Integrations.Express({ app: express }),
+  ],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
 
 const authorizeFn: Authorize<boolean> = async ({ teamId }) => {
 
@@ -36,7 +53,12 @@ const app = new App({
 	receiver,
 });
 
-const express = receiver.router;
+
+// RequestHandler creates a separate execution context using domains, so that every
+// transaction/span/breadcrumb is attached to its own Hub instance
+express.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+express.use(Sentry.Handlers.tracingHandler());
 
 express.get("/", (req, res) => {
 	console.log("Redirecting");
@@ -161,6 +183,12 @@ express.get("/slack/callback", async (req, res) => {
 			return res.send(error.messsage);
 		});
 });
+
+express.get("/debug-sentry", () => {
+  throw new Error("My first Sentry error!");
+});
+
+express.use(Sentry.Handlers.errorHandler());
 
 (async () => {
 	await createConnection();
