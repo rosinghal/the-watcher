@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "nodemon -r dotenv/config --exec 'ts-node' src/app.ts",
 		"prod": "ts-node src/app.ts",
+		"start": "yarn prod",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
 		"migrate": "ts-node ./node_modules/typeorm/cli.js migration:run",
 		"typeorm": "ts-node ./node_modules/typeorm/cli.js"
