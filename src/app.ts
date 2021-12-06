@@ -63,7 +63,7 @@ const commandPrefix =
 		: "dev_";
 
 app.command(
-	`/${commandPrefix}cloudflarewatcherauthkey`,
+	`/${commandPrefix}cloudflarewatcher`,
 	async ({ command, ack, say }) => {
 		try {
 			await ack();
