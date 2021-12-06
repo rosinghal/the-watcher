@@ -1,11 +1,12 @@
 import "reflect-metadata";
-import { App, Authorize, ExpressReceiver } from "@slack/bolt";
+import { App, ExpressReceiver } from "@slack/bolt";
 import { createConnection } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
-import axios from "axios";
 import dayjs from "dayjs";
-import Sentry from "@sentry/node";
-import Tracing from "@sentry/tracing";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
+import { authorizeFn } from "./controllers/auth";
+import { getAuditLogs } from "./controllers/cloudflare";
 
 const receiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
@@ -14,45 +15,29 @@ const receiver = new ExpressReceiver({
 const express = receiver.router;
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  integrations: [
-    // enable HTTP calls tracing
-    new Sentry.Integrations.Http({ tracing: true }),
-    // enable Express.js middleware tracing
-    new Tracing.Integrations.Express({ app: express }),
-  ],
+	dsn: process.env.SENTRY_DSN,
+	integrations: [
+		// enable HTTP calls tracing
+		new Sentry.Integrations.Http({ tracing: true }),
+		// enable Express.js middleware tracing
+		new Tracing.Integrations.Express({ app: express }),
+	],
 
-  // Set tracesSampleRate to 1.0 to capture 100%
-  // of transactions for performance monitoring.
-  // We recommend adjusting this value in production
-  tracesSampleRate: 1.0,
+	// Set tracesSampleRate to 1.0 to capture 100%
+	// of transactions for performance monitoring.
+	// We recommend adjusting this value in production
+	tracesSampleRate: 1.0,
 });
-
-const authorizeFn: Authorize<boolean> = async ({ teamId }) => {
-
-  if (teamId) {
-    const existingAppConfig = await AppConfig.findOne({
-      slackTeamId: teamId,
-    });
-
-    if (existingAppConfig) {
-      return existingAppConfig;
-    }
-  }
-
-  throw new Error('No matching authorizations');
-}
 
 // https://app.slack.com/app-settings/T02PUHPD0MN/A02P4RZ9SNN/app-manifest
 const app = new App({
 	// token: process.env.SLACK_BOT_TOKEN,
 	signingSecret: process.env.SLACK_SIGNING_SECRET,
-  authorize: authorizeFn,
+	authorize: authorizeFn,
 	// socketMode:true, // enable the following to use socket mode
 	// appToken: process.env.SLACK_APP_TOKEN,
 	receiver,
 });
-
 
 // RequestHandler creates a separate execution context using domains, so that every
 // transaction/span/breadcrumb is attached to its own Hub instance
@@ -72,57 +57,63 @@ express.get("/", (req, res) => {
 	res.end();
 });
 
-app.command(
-	"/cloudflarewatcherauthkey",
-	async ({ command, ack, say }) => {
-		console.log(command);
+const commandPrefix =
+	(process.env.NODE_ENV || "development").toLowerCase() === "production"
+		? ""
+		: "dev_";
 
+app.command(
+	`/${commandPrefix}cloudflarewatcherauthkey`,
+	async ({ command, ack, say }) => {
 		try {
 			await ack();
-			const [cloudflareAuthEmail, cloudflareAuthKey] =
+			const [cloudflareOrgId, cloudflareAuthEmail, cloudflareAuthKey] =
 				command.text.split(" ");
 			const existingAppConfig = await AppConfig.findOne({
 				slackTeamId: command.team_id,
 			});
 
 			if (!existingAppConfig) {
-        await say("Error: Slack app not configured with Watcher!");
+				await say("Error: Slack app not configured with Watcher!");
 				return;
 			}
 
-			axios
-				.get(
-					`https://api.cloudflare.com/client/v4/user/audit_logs?action.type=add&action.type=set&action.type=delete&since=${dayjs()
-						.subtract(1, "day")
-						.format("YYYY-MM-DD")}&before=${dayjs().format(
-						"YYYY-MM-DD"
-					)}`,
-					{
-						headers: {
-							"X-Auth-Email": cloudflareAuthEmail,
-							"X-Auth-Key": cloudflareAuthKey,
-							"Content-Type": "application/json",
-						},
-					}
-				)
+			getAuditLogs(
+				{
+					authEmail: cloudflareAuthEmail,
+					authKey: cloudflareAuthKey,
+				},
+				{
+					since: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
+					before: dayjs().format("YYYY-MM-DD"),
+					orgId: cloudflareOrgId
+				}
+			)
 				.then(async (cloudFlareResponse) => {
 					console.log(cloudFlareResponse.data);
 
-          existingAppConfig.cloudflareAuthEmail = cloudflareAuthEmail;
-          existingAppConfig.cloudflareAuthKey = cloudflareAuthKey;
-          existingAppConfig.cloudflareSlackChannelId = command.channel_id;
-          existingAppConfig.cloudflareLastCheckedAt = dayjs().toDate();
-          await existingAppConfig.save();
+					existingAppConfig.cloudflareAuthEmail = cloudflareAuthEmail;
+					existingAppConfig.cloudflareAuthKey = cloudflareAuthKey;
+					existingAppConfig.cloudflareSlackChannelId =
+						command.channel_id;
+					existingAppConfig.cloudflareLastCheckedAt =
+						dayjs().toDate();
+					existingAppConfig.cloudflareOrgId = cloudflareOrgId;
+					await existingAppConfig.save();
 
-          await say("Yaaay! Now you will get Cloudflare changes in this channel!");
+					await say(
+						"Yaaay! You will get new Cloudflare changes in this channel!"
+					);
 					return;
 				})
 				.catch(async () => {
-          await say("Error: Invalid data provided. Get Global API Key from https://dash.cloudflare.com/profile/api-tokens.");
+					await say(
+						"Error: Invalid data provided. Get Global API Key from https://dash.cloudflare.com/profile/api-tokens."
+					);
 					return;
 				});
 		} catch (error: any) {
-      await say(`Error: ${error.message}`);
+			await say(`Error: ${error.message}`);
 			return;
 		}
 	}
@@ -130,10 +121,10 @@ app.command(
 
 app.message(async ({ say, message }) => {
 	try {
-    await say({
-      thread_ts: message.event_ts,
-      text: "I am dumb, not sure why you are sending message to me!"
-    });
+		await say({
+			thread_ts: message.event_ts,
+			text: "I am dumb, not sure why you are sending message to me!",
+		});
 	} catch (error) {
 		console.log("err");
 		console.error(error);
@@ -185,13 +176,17 @@ express.get("/slack/callback", async (req, res) => {
 });
 
 express.get("/debug-sentry", () => {
-  throw new Error("My first Sentry error!");
+	throw new Error("My first Sentry error!");
 });
 
 express.use(Sentry.Handlers.errorHandler());
 
 (async () => {
-	await createConnection();
-	await app.start(Number(process.env.PORT));
-	console.log(`⚡️ Slack Bolt app is running on port ${process.env.PORT}!`);
+	try {
+		await createConnection();
+		await app.start(Number(process.env.PORT));
+		console.log(`⚡️ Slack app is running on port ${process.env.PORT}!`);
+	} catch (error: any) {
+		console.log(`Failed to start server, reason is ${error.message}!`);
+	}
 })();

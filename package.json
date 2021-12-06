@@ -5,6 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon -r dotenv/config --exec 'ts-node' src/app.ts",
+		"cron:dev": "ts-node -r dotenv/config src/cron.ts",
+		"cron:prod": "ts-node src/cron.ts",
 		"prod": "ts-node src/app.ts",
 		"start": "yarn prod",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",

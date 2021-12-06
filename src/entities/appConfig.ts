@@ -22,6 +22,9 @@ export class AppConfig extends BaseEntity {
 	slackAccessToken: string;
 
 	@Column({ nullable: true })
+	cloudflareOrgId?: string;
+
+	@Column({ nullable: true })
 	cloudflareAuthKey?: string;
 
 	@Column({ nullable: true })
