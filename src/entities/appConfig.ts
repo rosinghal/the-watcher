@@ -5,11 +5,16 @@ import {
 	UpdateDateColumn,
 	BaseEntity,
 	PrimaryGeneratedColumn,
+	BeforeInsert,
+	AfterInsert,
+	AfterLoad,
+	BeforeUpdate,
 } from "typeorm";
+import CryptoJS from "crypto-js";
 
 @Entity()
 export class AppConfig extends BaseEntity {
-    @PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn()
 	id: number;
 
 	@Column()
@@ -41,4 +46,26 @@ export class AppConfig extends BaseEntity {
 
 	@UpdateDateColumn()
 	updatedAt: Date;
+
+	@BeforeInsert()
+	@BeforeUpdate()
+	encryptData() {
+		if (this.cloudflareAuthKey) {
+			this.cloudflareAuthKey = CryptoJS.AES.encrypt(
+				this.cloudflareAuthKey,
+				process.env.CRYPT_KEY as string
+			).toString();
+		}
+	}
+
+	@AfterInsert()
+	@AfterLoad()
+	decryptData() {
+		if (this.cloudflareAuthKey) {
+			this.cloudflareAuthKey = CryptoJS.AES.decrypt(
+				this.cloudflareAuthKey,
+				process.env.CRYPT_KEY as string
+			).toString(CryptoJS.enc.Utf8);
+		}
+	}
 }
