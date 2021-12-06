@@ -1,6 +1,8 @@
 # The Watcher Slackbot
 Get CloudFlare audit logs directly to your Slack Workspace.
 
+![Demo](./static/demo.png)
+
 
 ## Installation
 1. Install to your Slack Workspace by going to https://d-watcher.herokuapp.com/.
