@@ -249,8 +249,8 @@ const getAuditLogBlocks = (auditLog: AuditLog) => {
                 appConfig.cloudflareOrgId
 			) {
 				const currentTime = dayjs();
-				// const since = dayjs(appConfig.cloudflareLastCheckedAt || dayjs().subtract(1, "day"));
-				const since = dayjs().subtract(1, "week");
+				const since = dayjs(appConfig.cloudflareLastCheckedAt || dayjs().subtract(1, "day"));
+				// const since = dayjs().subtract(1, "week");
 				const auditLogs = await getAuditLogs(
 					{
 						authEmail: appConfig.cloudflareAuthEmail,
@@ -262,8 +262,8 @@ const getAuditLogBlocks = (auditLog: AuditLog) => {
                         orgId: appConfig.cloudflareOrgId
 					}
 				);
-				// appConfig.cloudflareLastCheckedAt = currentTime.toDate();
-				// await appConfig.save();
+				appConfig.cloudflareLastCheckedAt = currentTime.toDate();
+				await appConfig.save();
 
                 for (const auditLog of auditLogs.data.result) {
                     await app.client.chat.postMessage({
