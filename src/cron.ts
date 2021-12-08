@@ -28,25 +28,25 @@ const app = new App({
 });
 
 const getAuditLogTitle = (auditLog: AuditLog) => {
-    switch (auditLog.action.type) {
-        case "rec_add":
-            return "DNS record added";
+	switch (auditLog.action.type) {
+		case "rec_add":
+			return "DNS record added";
 
-        case "rec_del":
-            return "DNS record deleted";
+		case "rec_del":
+			return "DNS record deleted";
 
-        case "rec_set":
-            return "DNS record updated";
+		case "rec_set":
+			return "DNS record updated";
 
 		case "purge":
 			return `${auditLog.metadata.zone_name} deleted`;
 
-        case "add":
-            return `${auditLog.metadata.zone_name} added`;
+		case "add":
+			return `${auditLog.metadata.zone_name} added`;
 
-        default:
-            return "";
-    }
+		default:
+			return "";
+	}
 };
 
 const getAuditLogData = (
@@ -55,7 +55,7 @@ const getAuditLogData = (
 	| {
 			text: string;
 			blocks: ChatPostMessageArguments["blocks"];
-}
+	  }
 	| "" => {
 	const text = getAuditLogTitle(auditLog);
 	switch (auditLog.action.type) {
@@ -85,154 +85,154 @@ const getAuditLogDNSBlocks = (
 				text: getAuditLogTitle(auditLog),
 			},
 		},
-    ];
+	];
 	if (auditLog.newValueJson && !auditLog.oldValueJson) {
 		// in case of rec_add
-        blocks.push({
-            type: "context",
-            elements: [
-                {
-                    type: "mrkdwn",
-                    text: `Domain: ${auditLog.newValueJson.zone_name}`,
-                },
-                {
-                    type: "mrkdwn",
-                    text: `Type: ${auditLog.newValueJson.type}`,
-                },
-                {
-                    type: "mrkdwn",
-                    text: `Name: ${auditLog.newValueJson.name}`,
-                },
-                {
-                    type: "mrkdwn",
-                    text: `Value: ${auditLog.newValueJson.content}`,
-                },
-                {
-                    type: "mrkdwn",
-                    text: `TTL: ${auditLog.newValueJson.ttl}`,
-                },
-                {
-                    type: "mrkdwn",
-                    text: `Proxy: ${auditLog.newValueJson.proxied}`,
-                },
+		blocks.push({
+			type: "context",
+			elements: [
+				{
+					type: "mrkdwn",
+					text: `Domain: ${auditLog.newValueJson.zone_name}`,
+				},
+				{
+					type: "mrkdwn",
+					text: `Type: ${auditLog.newValueJson.type}`,
+				},
+				{
+					type: "mrkdwn",
+					text: `Name: ${auditLog.newValueJson.name}`,
+				},
+				{
+					type: "mrkdwn",
+					text: `Value: ${auditLog.newValueJson.content}`,
+				},
+				{
+					type: "mrkdwn",
+					text: `TTL: ${auditLog.newValueJson.ttl}`,
+				},
+				{
+					type: "mrkdwn",
+					text: `Proxy: ${auditLog.newValueJson.proxied}`,
+				},
 			],
 		});
-    }
+	}
 	if (auditLog.oldValueJson && !auditLog.newValueJson) {
 		// in case of rec_del
-        blocks.push({
-            type: "context",
-            elements: [
-                {
-                    type: "mrkdwn",
+		blocks.push({
+			type: "context",
+			elements: [
+				{
+					type: "mrkdwn",
 					text: `Domain: ${auditLog.oldValueJson.zone_name}`,
-                },
-                {
-                    type: "mrkdwn",
+				},
+				{
+					type: "mrkdwn",
 					text: `Name: ${auditLog.oldValueJson.name}`,
-                },
-                {
-                    type: "mrkdwn",
+				},
+				{
+					type: "mrkdwn",
 					text: `Value: ${auditLog.oldValueJson.content}`,
-                },
+				},
 			],
 		});
-    }
+	}
 	if (auditLog.oldValueJson && auditLog.newValueJson) {
 		// in case of rec_set
-        const blockElements: ContextBlock["elements"] = [];
+		const blockElements: ContextBlock["elements"] = [];
 
 		if (
 			auditLog.newValueJson.zone_name !== auditLog.oldValueJson.zone_name
 		) {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Domain: ${auditLog.newValueJson.zone_name}`,
+				type: "mrkdwn",
+				text: `Domain: ${auditLog.newValueJson.zone_name}`,
 			});
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Old Domain: ${auditLog.oldValueJson.zone_name}`,
+				type: "mrkdwn",
+				text: `Old Domain: ${auditLog.oldValueJson.zone_name}`,
 			});
-        } else {
+		} else {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Domain: ${auditLog.newValueJson.zone_name}`,
+				type: "mrkdwn",
+				text: `Domain: ${auditLog.newValueJson.zone_name}`,
 			});
-        }
+		}
 
-        if (auditLog.newValueJson.type !== auditLog.oldValueJson.type) {
+		if (auditLog.newValueJson.type !== auditLog.oldValueJson.type) {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Type: ${auditLog.newValueJson.type}`,
+				type: "mrkdwn",
+				text: `Type: ${auditLog.newValueJson.type}`,
 			});
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Old Type: ${auditLog.oldValueJson.type}`,
+				type: "mrkdwn",
+				text: `Old Type: ${auditLog.oldValueJson.type}`,
 			});
-        } else {
+		} else {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Type: ${auditLog.newValueJson.type}`,
+				type: "mrkdwn",
+				text: `Type: ${auditLog.newValueJson.type}`,
 			});
-        }
+		}
 
-        if (auditLog.newValueJson.name !== auditLog.oldValueJson.name) {
+		if (auditLog.newValueJson.name !== auditLog.oldValueJson.name) {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Name: ${auditLog.newValueJson.name}`,
+				type: "mrkdwn",
+				text: `Name: ${auditLog.newValueJson.name}`,
 			});
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Old Name: ${auditLog.oldValueJson.name}`,
+				type: "mrkdwn",
+				text: `Old Name: ${auditLog.oldValueJson.name}`,
 			});
-        } else {
+		} else {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Name: ${auditLog.newValueJson.name}`,
+				type: "mrkdwn",
+				text: `Name: ${auditLog.newValueJson.name}`,
 			});
-        }
+		}
 
-        if (auditLog.newValueJson.content !== auditLog.oldValueJson.content) {
+		if (auditLog.newValueJson.content !== auditLog.oldValueJson.content) {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Value: ${auditLog.newValueJson.content}`,
+				type: "mrkdwn",
+				text: `Value: ${auditLog.newValueJson.content}`,
 			});
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Old Value: ${auditLog.oldValueJson.content}`,
+				type: "mrkdwn",
+				text: `Old Value: ${auditLog.oldValueJson.content}`,
 			});
-        }
+		}
 
-        if (auditLog.newValueJson.ttl !== auditLog.oldValueJson.ttl) {
+		if (auditLog.newValueJson.ttl !== auditLog.oldValueJson.ttl) {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `TTL: ${auditLog.newValueJson.ttl}`,
+				type: "mrkdwn",
+				text: `TTL: ${auditLog.newValueJson.ttl}`,
 			});
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Old TTL: ${auditLog.oldValueJson.ttl}`,
+				type: "mrkdwn",
+				text: `Old TTL: ${auditLog.oldValueJson.ttl}`,
 			});
-        }
+		}
 
-        if (auditLog.newValueJson.proxied !== auditLog.oldValueJson.proxied) {
+		if (auditLog.newValueJson.proxied !== auditLog.oldValueJson.proxied) {
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Proxy: ${auditLog.newValueJson.proxied}`,
+				type: "mrkdwn",
+				text: `Proxy: ${auditLog.newValueJson.proxied}`,
 			});
 			blockElements.push({
-                    type: "mrkdwn",
-                    text: `Old Proxy: ${auditLog.oldValueJson.proxied}`,
+				type: "mrkdwn",
+				text: `Old Proxy: ${auditLog.oldValueJson.proxied}`,
 			});
-        }
+		}
 
-        blocks.push({
-            type: "context",
+		blocks.push({
+			type: "context",
 			elements: blockElements,
 		});
-    }
+	}
 
-	return[
-        ...blocks,
+	return [
+		...blocks,
 		{
 			type: "context",
 			elements: [
@@ -242,7 +242,7 @@ const getAuditLogDNSBlocks = (
 				},
 			],
 		},
-    ];
+	];
 };
 
 (async () => {
@@ -258,16 +258,19 @@ const getAuditLogDNSBlocks = (
 		});
 
 		for (const appConfig of appConfigs) {
-            console.log(`Processing for ${appConfig.slackTeamName}`);
+			console.log(`Processing for ${appConfig.slackTeamName}`);
 
 			if (
 				appConfig.cloudflareSlackChannelId &&
 				appConfig.cloudflareAuthEmail &&
 				appConfig.cloudflareAuthKey &&
-                appConfig.cloudflareOrgId
+				appConfig.cloudflareOrgId
 			) {
 				const currentTime = dayjs();
-				const since = dayjs(appConfig.cloudflareLastCheckedAt || dayjs().subtract(1, "day"));
+				const since = dayjs(
+					appConfig.cloudflareLastCheckedAt ||
+						dayjs().subtract(1, "day")
+				);
 				// const since = dayjs().subtract(1, "week");
 				const auditLogs = await getAuditLogs(
 					{
@@ -277,7 +280,7 @@ const getAuditLogDNSBlocks = (
 					{
 						since: since.toISOString(),
 						before: currentTime.toISOString(),
-                        orgId: appConfig.cloudflareOrgId
+						orgId: appConfig.cloudflareOrgId,
 					}
 				);
 				appConfig.cloudflareLastCheckedAt = currentTime.toDate();
@@ -285,15 +288,15 @@ const getAuditLogDNSBlocks = (
 
 				// console.log(auditLogs.data.result);
 
-                for (const auditLog of auditLogs.data.result) {
+				for (const auditLog of auditLogs.data.result) {
 					const data = getAuditLogData(auditLog);
 					if (data) {
-                    await app.client.chat.postMessage({
-                        token: appConfig.slackAccessToken,
-                        channel: appConfig.cloudflareSlackChannelId,
+						await app.client.chat.postMessage({
+							token: appConfig.slackAccessToken,
+							channel: appConfig.cloudflareSlackChannelId,
 							...data,
-                    });
-                }
+						});
+					}
 				}
 			}
 		}
