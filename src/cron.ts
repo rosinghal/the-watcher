@@ -260,6 +260,8 @@ const getAuditLogDNSBlocks = (
 		for (const appConfig of appConfigs) {
 			console.log(`Processing for ${appConfig.slackTeamName}`);
 
+			console.log("appConfig", appConfig);
+
 			if (
 				appConfig.cloudflareSlackChannelId &&
 				appConfig.cloudflareAuthEmail &&
