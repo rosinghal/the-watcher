@@ -283,10 +283,8 @@ const getAuditLogDNSBlocks = (
 						orgId: appConfig.cloudflareOrgId,
 					}
 				);
-				appConfig.cloudflareLastCheckedAt = currentTime.toDate();
-				await appConfig.save();
 
-				// console.log(auditLogs.data.result);
+				console.log(auditLogs.data);
 
 				for (const auditLog of auditLogs.data.result) {
 					const data = getAuditLogData(auditLog);
@@ -298,6 +296,9 @@ const getAuditLogDNSBlocks = (
 						});
 					}
 				}
+
+				appConfig.cloudflareLastCheckedAt = currentTime.toDate();
+				await appConfig.save();
 			}
 		}
 	} catch (error: any) {
