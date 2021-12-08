@@ -3,7 +3,7 @@ import axios from "axios";
 export interface AuditLog {
 	id: string;
 	action: {
-		type: "change_setting" | "rec_add" | "rec_del" | "rec_set";
+		type: "change_setting" | "rec_add" | "rec_del" | "rec_set" | "purge" | "login" | "API_key_view" | "API_key_created" | "API_key_deactivated" | "rotate_API_key" | "tls_settings_deployed" | "add";
 		result: boolean;
 	};
 	actor: {
@@ -66,7 +66,7 @@ export const getAuditLogs = (
 	);
 
 	return axios.get<AuditLogsResponse>(
-		`https://api.cloudflare.com/client/v4/organizations/${params.orgId}/audit_logs?action.type=add&action.type=set&action.type=delete&since=${params.since}&before=${params.before}`,
+		`https://api.cloudflare.com/client/v4/organizations/${params.orgId}/audit_logs?action.type=add&action.type=set&action.type=delete&action.type=purge&since=${params.since}&before=${params.before}`,
 		{
 			headers: {
 				"X-Auth-Email": headers.authEmail,
