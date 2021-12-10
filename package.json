@@ -1,5 +1,5 @@
 {
-	"name": "the-watcher-slack-bot",
+	"name": "the-watcher",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
@@ -34,5 +34,9 @@
 		"@types/node": "^16.11.11",
 		"dotenv": "^10.0.0",
 		"nodemon": "^2.0.15"
-	}
+	},
+	"engines": {
+		"node": ">=14.0.0"
+	},
+	"engineStrict": true
 }
