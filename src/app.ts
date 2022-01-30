@@ -16,6 +16,7 @@ const express = receiver.router;
 
 Sentry.init({
 	dsn: process.env.SENTRY_DSN,
+	environment: process.env.NODE_ENV,
 	integrations: [
 		// enable HTTP calls tracing
 		new Sentry.Integrations.Http({ tracing: true }),
