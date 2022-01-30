@@ -6,11 +6,12 @@
 	"scripts": {
 		"dev": "nodemon -r dotenv/config --exec 'ts-node' src/app.ts",
 		"cron:dev": "ts-node -r dotenv/config src/cron.ts",
-		"cron:prod": "node .build/cron.js",
-		"prod": "node .build/app.js",
-		"build": "tsc --build",
+		"migrate:dev": "ts-node ./node_modules/typeorm/cli.js migration:run",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
-		"migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
+		"prod": "node .build/app.js",
+		"build:prod": "tsc --build",
+		"cron:prod": "node .build/cron.js",
+		"migrate:prod": "node ./node_modules/typeorm/cli.js migration:run"
 	},
 	"keywords": [],
 	"author": "",
