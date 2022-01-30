@@ -8,8 +8,8 @@
 		"cron:dev": "ts-node -r dotenv/config src/cron.ts",
 		"migrate:dev": "ts-node ./node_modules/typeorm/cli.js migration:run",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
+		"build": "tsc --build",
 		"prod": "node .build/app.js",
-		"build:prod": "tsc --build",
 		"cron:prod": "node .build/cron.js",
 		"migrate:prod": "node ./node_modules/typeorm/cli.js migration:run"
 	},
