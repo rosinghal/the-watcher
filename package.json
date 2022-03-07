@@ -7,6 +7,7 @@
 		"dev": "nodemon -r dotenv/config --exec 'ts-node' src/app.ts",
 		"cron:dev": "ts-node -r dotenv/config src/cron.ts",
 		"migrate:dev": "ts-node ./node_modules/typeorm/cli.js migration:run",
+		"tailwind": "tailwindcss -i src/public/styles/tailwind.css -o src/public/styles/main.css --watch",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
 		"build": "tsc --build",
 		"prod": "node .build/app.js",
@@ -23,6 +24,8 @@
 		"axios": "^0.24.0",
 		"crypto-js": "^4.1.1",
 		"dayjs": "^1.10.7",
+		"express": "^4.17.2",
+		"express-handlebars": "^6.0.2",
 		"mysql": "^2.18.1",
 		"reflect-metadata": "^0.1.13",
 		"typeorm": "^0.2.41"
@@ -30,13 +33,16 @@
 	"devDependencies": {
 		"@types/crypto-js": "^4.1.0",
 		"@types/node": "^16.11.11",
+		"autoprefixer": "^10.4.2",
 		"dotenv": "^10.0.0",
 		"nodemon": "^2.0.15",
+		"postcss": "^8.4.5",
+		"tailwindcss": "^3.0.18",
 		"ts-node": "^10.4.0",
 		"typescript": "^4.5.5"
 	},
 	"engines": {
-		"node": ">=17.0.0"
+		"node": ">=14"
 	},
 	"engineStrict": true
 }

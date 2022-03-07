@@ -3,16 +3,19 @@ import { App, ExpressReceiver } from "@slack/bolt";
 import { createConnection } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
 import dayjs from "dayjs";
+import path from "path";
+import express from "express";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
+import { engine } from "express-handlebars";
 import { authorizeFn } from "./controllers/auth";
 import { getAuditLogs } from "./controllers/cloudflare";
 
-const receiver = new ExpressReceiver({
+const expressReceiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
 });
 
-const express = receiver.router;
+const expressRouter = expressReceiver.router;
 
 Sentry.init({
 	dsn: process.env.SENTRY_DSN,
@@ -21,7 +24,7 @@ Sentry.init({
 		// enable HTTP calls tracing
 		new Sentry.Integrations.Http({ tracing: true }),
 		// enable Express.js middleware tracing
-		new Tracing.Integrations.Express({ app: express }),
+		new Tracing.Integrations.Express({ app: expressRouter }),
 	],
 
 	// Set tracesSampleRate to 1.0 to capture 100%
@@ -30,23 +33,32 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 });
 
-// https://app.slack.com/app-settings/T02PUHPD0MN/A02P4RZ9SNN/app-manifest
 const app = new App({
 	// token: process.env.SLACK_BOT_TOKEN,
 	signingSecret: process.env.SLACK_SIGNING_SECRET,
 	authorize: authorizeFn,
 	// socketMode:true, // enable the following to use socket mode
 	// appToken: process.env.SLACK_APP_TOKEN,
-	receiver,
+	receiver: expressReceiver,
 });
 
 // RequestHandler creates a separate execution context using domains, so that every
 // transaction/span/breadcrumb is attached to its own Hub instance
-express.use(Sentry.Handlers.requestHandler());
+expressRouter.use(Sentry.Handlers.requestHandler());
 // TracingHandler creates a trace for every incoming request
-express.use(Sentry.Handlers.tracingHandler());
+expressRouter.use(Sentry.Handlers.tracingHandler());
 
-express.get("/", (req, res) => {
+expressReceiver.app.set("views", path.join(__dirname, "views"));
+expressReceiver.app.set("view engine", "handlebars");
+expressRouter.use(express.static(path.join(__dirname, "public")));
+expressReceiver.app.engine("handlebars", engine());
+
+expressRouter.get("/", (_, res) => {
+	console.log("Rendering home");
+	res.render("home", { title: "Home" });
+});
+
+expressRouter.get("/install", (_, res) => {
 	console.log("Redirecting");
 	res.redirect(
 		`https://slack.com/oauth/v2/authorize?client_id=${
@@ -87,7 +99,7 @@ app.command(
 				{
 					since: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
 					before: dayjs().format("YYYY-MM-DD"),
-					orgId: cloudflareOrgId
+					orgId: cloudflareOrgId,
 				}
 			)
 				.then(async (cloudFlareResponse) => {
@@ -132,7 +144,7 @@ app.message(async ({ say, message }) => {
 	}
 });
 
-express.get("/slack/callback", async (req, res) => {
+expressRouter.get("/slack/callback", async (req, res) => {
 	const data = {
 		client_id: String(process.env.SLACK_CLIENT_ID),
 		client_secret: String(process.env.SLACK_CLIENT_SECRET),
@@ -164,7 +176,9 @@ express.get("/slack/callback", async (req, res) => {
 
 					await appConfig.save();
 
-					return res.send("Successfully installed the app");
+					return res.render("installSuccess", {
+						title: "Installation Successful"
+					});
 				}
 				throw new Error("Slack app already installed");
 			}
@@ -172,15 +186,18 @@ express.get("/slack/callback", async (req, res) => {
 		})
 		.catch((error) => {
 			console.error(error);
-			return res.send(error.messsage);
+			return res.render("installError", {
+				description: error.messsage || "Failed to install bot for your Slack workspace, please try again",
+				title: "Installation Failed"
+			});
 		});
 });
 
-express.get("/debug-sentry", () => {
+expressRouter.get("/debug-sentry", () => {
 	throw new Error("My first Sentry error!");
 });
 
-express.use(Sentry.Handlers.errorHandler());
+expressRouter.use(Sentry.Handlers.errorHandler());
 
 (async () => {
 	try {
