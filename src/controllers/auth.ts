@@ -1,11 +1,16 @@
 import { Authorize } from "@slack/bolt";
 import { AppConfig } from "../entities/appConfig";
 
-export const authorizeFn: Authorize<boolean> = async ({ teamId }) => {
-
+export const authorizeFn: Authorize = async ({
+	teamId,
+}: {
+	teamId: string;
+}): Promise<AppConfig> => {
 	if (teamId) {
 		const existingAppConfig = await AppConfig.findOne({
-			slackTeamId: teamId,
+			where: {
+				slackTeamId: teamId,
+			}
 		});
 
 		if (existingAppConfig) {
@@ -13,5 +18,5 @@ export const authorizeFn: Authorize<boolean> = async ({ teamId }) => {
 		}
 	}
 
-	throw new Error('No matching authorizations');
+	throw new Error("No matching authorizations");
 };
