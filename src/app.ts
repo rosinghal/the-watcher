@@ -93,7 +93,9 @@ app.command(
 			const [cloudflareOrgId, cloudflareAuthEmail, cloudflareAuthKey] =
 				command.text.split(" ");
 			const existingAppConfig = await AppConfig.findOne({
-				slackTeamId: command.team_id,
+				where: {
+					slackTeamId: command.team_id,
+				}
 			});
 
 			if (!existingAppConfig) {
@@ -174,7 +176,9 @@ expressRouter.get("/slack/callback", async (req, res) => {
 				result.team.name
 			) {
 				const existingAppConfig = await AppConfig.findOne({
-					slackTeamId: result.team.id,
+					where: {
+						slackTeamId: result.team.id,
+					}
 				});
 
 				if (!existingAppConfig) {
