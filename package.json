@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "nodemon -r dotenv/config --exec 'ts-node' src/app.ts",
 		"cron:dev": "ts-node -r dotenv/config src/cron.ts",
-		"migrate:dev": "ts-node ./node_modules/typeorm/cli.js migration:run",
+		"migrate:dev": "ts-node -r dotenv/config ./node_modules/typeorm/cli.js migration:run",
 		"tailwind:dev": "tailwindcss -i src/public/styles/tailwind.css -o src/public/styles/main.css --watch",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
 		"build": "yarn tailwind:prod && tsc --build && cp -r src/public src/views .build",
@@ -29,7 +29,7 @@
 		"express-handlebars": "^6.0.2",
 		"pg": "^8.7.3",
 		"reflect-metadata": "^0.1.13",
-		"typeorm": "^0.3.0"
+		"typeorm": "^0.2.41"
 	},
 	"devDependencies": {
 		"@types/crypto-js": "4.1.1",
