@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { App } from "@slack/bolt";
-import { createConnection, IsNull, Not } from "typeorm";
+import { IsNull, Not } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
 import { AuditLog, getAuditLogs } from "./controllers/cloudflare";
 import dayjs from "dayjs";
@@ -227,8 +227,6 @@ const getAuditLogDNSBlocks = (
 
 export const checkLatestCloudflareLogs = async (app: App) => {
 	try {
-		await createConnection();
-
 		const appConfigs = await AppConfig.find({
 			where: {
 				cloudflareAuthEmail: Not(IsNull()),
