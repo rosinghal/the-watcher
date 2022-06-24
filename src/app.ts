@@ -10,6 +10,7 @@ import * as Tracing from "@sentry/tracing";
 import { engine } from "express-handlebars";
 import { authorizeFn } from "./controllers/auth";
 import { getAuditLogs } from "./controllers/cloudflare";
+import { checkLatestCloudflareLogs } from "./cron";
 
 const expressReceiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
@@ -30,7 +31,7 @@ Sentry.init({
 	// Set tracesSampleRate to 1.0 to capture 100%
 	// of transactions for performance monitoring.
 	// We recommend adjusting this value in production
-	tracesSampleRate: 1.0,
+	tracesSampleRate: 0.1,
 });
 
 const app = new App({
@@ -56,6 +57,15 @@ expressReceiver.app.engine("handlebars", engine());
 expressRouter.get("/", (_, res) => {
 	console.log("Rendering home");
 	res.render("home", { title: "Home" });
+});
+
+expressRouter.get("/cron", async (_, res) => {
+	try {
+		await checkLatestCloudflareLogs(app);
+		res.json({ success: true });
+	} catch (error) {
+		res.json({ success: false });
+	}
 });
 
 expressRouter.get("/install", (_, res) => {
@@ -177,7 +187,7 @@ expressRouter.get("/slack/callback", async (req, res) => {
 					await appConfig.save();
 
 					return res.render("installSuccess", {
-						title: "Installation Successful"
+						title: "Installation Successful",
 					});
 				}
 				throw new Error("Slack app already installed");
@@ -187,8 +197,10 @@ expressRouter.get("/slack/callback", async (req, res) => {
 		.catch((error) => {
 			console.error(error);
 			return res.render("installError", {
-				description: error.messsage || "Failed to install bot for your Slack workspace, please try again",
-				title: "Installation Failed"
+				description:
+					error.messsage ||
+					"Failed to install bot for your Slack workspace, please try again",
+				title: "Installation Failed",
 			});
 		});
 });

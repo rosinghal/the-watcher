@@ -2,31 +2,10 @@ import "reflect-metadata";
 import { App } from "@slack/bolt";
 import { createConnection, IsNull, Not } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
-import * as Sentry from "@sentry/node";
-import { authorizeFn } from "./controllers/auth";
 import { AuditLog, getAuditLogs } from "./controllers/cloudflare";
 import dayjs from "dayjs";
 import { ChatPostMessageArguments } from "@slack/web-api";
 import { ContextBlock } from "@slack/types";
-
-Sentry.init({
-	dsn: process.env.SENTRY_DSN,
-	environment: process.env.NODE_ENV,
-
-	// Set tracesSampleRate to 1.0 to capture 100%
-	// of transactions for performance monitoring.
-	// We recommend adjusting this value in production
-	tracesSampleRate: 1.0,
-});
-
-// https://app.slack.com/app-settings/T02PUHPD0MN/A02P4RZ9SNN/app-manifest
-const app = new App({
-	// token: process.env.SLACK_BOT_TOKEN,
-	signingSecret: process.env.SLACK_SIGNING_SECRET,
-	authorize: authorizeFn,
-	// socketMode:true, // enable the following to use socket mode
-	// appToken: process.env.SLACK_APP_TOKEN,
-});
 
 const getAuditLogTitle = (auditLog: AuditLog) => {
 	switch (auditLog.action.type) {
@@ -246,7 +225,7 @@ const getAuditLogDNSBlocks = (
 	];
 };
 
-(async () => {
+export const checkLatestCloudflareLogs = async (app: App) => {
 	try {
 		await createConnection();
 
@@ -258,7 +237,7 @@ const getAuditLogDNSBlocks = (
 			},
 		});
 
-		for (const appConfig of appConfigs) {
+		for await (const appConfig of appConfigs) {
 			console.log(`Processing for ${appConfig.slackTeamName}`);
 
 			console.log("appConfig", appConfig);
@@ -307,5 +286,4 @@ const getAuditLogDNSBlocks = (
 	} catch (error: any) {
 		console.log(`Failed to run cron, reason is ${error.message}!`);
 	}
-	process.exit();
-})();
+};
