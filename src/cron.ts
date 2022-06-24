@@ -238,8 +238,6 @@ export const checkLatestCloudflareLogs = async (app: App) => {
 		for await (const appConfig of appConfigs) {
 			console.log(`Processing for ${appConfig.slackTeamName}`);
 
-			console.log("appConfig", appConfig);
-
 			if (
 				appConfig.cloudflareSlackChannelId &&
 				appConfig.cloudflareAuthEmail &&
@@ -264,7 +262,7 @@ export const checkLatestCloudflareLogs = async (app: App) => {
 					}
 				);
 
-				console.log(auditLogs.data);
+				console.log(`Found ${auditLogs.data.result.length} new logs`);
 
 				for (const auditLog of auditLogs.data.result) {
 					const data = getAuditLogData(auditLog);
