@@ -26,20 +26,20 @@ export class AppConfig extends BaseEntity {
 	@Column()
 	slackAccessToken: string;
 
-	@Column({ nullable: true })
-	cloudflareOrgId?: string;
+	@Column({ nullable: true, type: "varchar" })
+	cloudflareOrgId: string | null;
 
-	@Column({ nullable: true })
-	cloudflareAuthKey?: string;
+	@Column({ nullable: true, type: "varchar" })
+	cloudflareAuthKey: string | null;
 
-	@Column({ nullable: true })
-	cloudflareAuthEmail?: string;
+	@Column({ nullable: true, type: "varchar" })
+	cloudflareAuthEmail: string | null;
 
-	@Column({ nullable: true })
-	cloudflareSlackChannelId?: string;
+	@Column({ nullable: true, type: "varchar" })
+	cloudflareSlackChannelId: string | null;
 
-	@Column({ nullable: true, type: "datetime" })
-	cloudflareLastCheckedAt?: Date;
+	@Column({ nullable: true, type: "timestamp without time zone" })
+	cloudflareLastCheckedAt: Date | null;
 
 	@CreateDateColumn()
 	createdAt: Date;
