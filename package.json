@@ -33,7 +33,7 @@
 	},
 	"devDependencies": {
 		"@types/crypto-js": "4.1.1",
-		"@types/node": "16.11.42",
+		"@types/node": "16.11.43",
 		"autoprefixer": "10.4.7",
 		"dotenv": "16.0.1",
 		"nodemon": "2.0.18",
