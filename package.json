@@ -35,7 +35,7 @@
 		"@types/crypto-js": "4.1.1",
 		"@types/node": "16.11.55",
 		"autoprefixer": "10.4.8",
-		"dotenv": "16.0.1",
+		"dotenv": "16.0.2",
 		"nodemon": "2.0.19",
 		"postcss": "8.4.16",
 		"tailwindcss": "3.1.8",
