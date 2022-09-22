@@ -24,7 +24,7 @@
 		"@slack/bolt": "3.8.1",
 		"axios": "0.27.0",
 		"crypto-js": "4.1.1",
-		"dayjs": "1.10.7",
+		"dayjs": "1.11.5",
 		"express": "4.17.2",
 		"express-handlebars": "6.0.6",
 		"pg": "8.7.3",
