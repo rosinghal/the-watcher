@@ -1,11 +1,13 @@
 import { Authorize } from "@slack/bolt";
+import { AppDataSource } from "../data-source";
 import { AppConfig } from "../entities/appConfig";
 
 export const authorizeFn: Authorize<boolean> = async ({
 	teamId,
 }): Promise<AppConfig> => {
 	if (teamId) {
-		const existingAppConfig = await AppConfig.findOne({
+		const appConfigRepository = AppDataSource.getRepository(AppConfig);
+		const existingAppConfig = await appConfigRepository.findOne({
 			where: {
 				slackTeamId: teamId,
 			}

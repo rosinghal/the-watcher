@@ -19,17 +19,17 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@sentry/node": "^7.0.0",
-		"@sentry/tracing": "^7.0.0",
-		"@slack/bolt": "^3.8.1",
-		"axios": "^0.27.0",
-		"crypto-js": "^4.1.1",
-		"dayjs": "^1.10.7",
-		"express": "^4.17.2",
-		"express-handlebars": "^6.0.2",
-		"pg": "^8.7.3",
-		"reflect-metadata": "^0.1.13",
-		"typeorm": "^0.2.41"
+		"@sentry/node": "7.0.0",
+		"@sentry/tracing": "7.0.0",
+		"@slack/bolt": "3.8.1",
+		"axios": "0.27.0",
+		"crypto-js": "4.1.1",
+		"dayjs": "1.10.7",
+		"express": "4.17.2",
+		"express-handlebars": "6.0.2",
+		"pg": "8.7.3",
+		"reflect-metadata": "0.1.13",
+		"typeorm": "0.3.10"
 	},
 	"devDependencies": {
 		"@types/crypto-js": "4.1.1",

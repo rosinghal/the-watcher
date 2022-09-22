@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import { App, ExpressReceiver } from "@slack/bolt";
-import { createConnection } from "typeorm";
 import { AppConfig } from "./entities/appConfig";
 import dayjs from "dayjs";
 import path from "path";
@@ -11,6 +10,7 @@ import { engine } from "express-handlebars";
 import { authorizeFn } from "./controllers/auth";
 import { getAuditLogs } from "./controllers/cloudflare";
 import { checkLatestCloudflareLogs } from "./cron";
+import { AppDataSource } from "./data-source";
 
 const expressReceiver = new ExpressReceiver({
 	signingSecret: String(process.env.SLACK_SIGNING_SECRET),
@@ -92,10 +92,12 @@ app.command(
 			await ack();
 			const [cloudflareOrgId, cloudflareAuthEmail, cloudflareAuthKey] =
 				command.text.split(" ");
-			const existingAppConfig = await AppConfig.findOne({
+
+			const appConfigRepository = AppDataSource.getRepository(AppConfig);
+			const existingAppConfig = await appConfigRepository.findOne({
 				where: {
 					slackTeamId: command.team_id,
-				}
+				},
 			});
 
 			if (!existingAppConfig) {
@@ -124,7 +126,7 @@ app.command(
 					existingAppConfig.cloudflareLastCheckedAt =
 						dayjs().toDate();
 					existingAppConfig.cloudflareOrgId = cloudflareOrgId;
-					await existingAppConfig.save();
+					await AppDataSource.manager.save(existingAppConfig);
 
 					await say(
 						"Yaaay! You will get new Cloudflare changes in this channel!"
@@ -164,6 +166,8 @@ expressRouter.get("/slack/callback", async (req, res) => {
 		redirect_uri: String(process.env.HOST) + "/slack/callback",
 	};
 
+	const appConfigRepository = AppDataSource.getRepository(AppConfig);
+
 	await app.client.oauth.v2
 		.access(data)
 		.then(async (result) => {
@@ -175,20 +179,19 @@ expressRouter.get("/slack/callback", async (req, res) => {
 				result.team.id &&
 				result.team.name
 			) {
-				const existingAppConfig = await AppConfig.findOne({
+				const existingAppConfig = await appConfigRepository.findOne({
 					where: {
 						slackTeamId: result.team.id,
-					}
+					},
 				});
 
 				if (!existingAppConfig) {
-					const appConfig = AppConfig.create({
-						slackAccessToken: result.access_token,
-						slackTeamId: result.team.id,
-						slackTeamName: result.team.name,
-					});
+					const appConfig = new AppConfig();
+					(appConfig.slackAccessToken = result.access_token),
+						(appConfig.slackTeamId = result.team.id);
+					appConfig.slackTeamName = result.team.name;
 
-					await appConfig.save();
+					await AppDataSource.manager.save(appConfig);
 
 					return res.render("installSuccess", {
 						title: "Installation Successful",
@@ -200,6 +203,7 @@ expressRouter.get("/slack/callback", async (req, res) => {
 		})
 		.catch((error) => {
 			console.error(error);
+			Sentry.captureException(error);
 			return res.render("installError", {
 				description:
 					error.messsage ||
@@ -217,7 +221,7 @@ expressRouter.use(Sentry.Handlers.errorHandler());
 
 (async () => {
 	try {
-		await createConnection();
+		await AppDataSource.initialize();
 		await app.start(Number(process.env.PORT));
 		console.log(`⚡️ Slack app is running on port ${process.env.PORT}!`);
 	} catch (error: any) {

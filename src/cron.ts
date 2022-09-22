@@ -6,6 +6,7 @@ import { AuditLog, getAuditLogs } from "./controllers/cloudflare";
 import dayjs from "dayjs";
 import { ChatPostMessageArguments } from "@slack/web-api";
 import { ContextBlock } from "@slack/types";
+import { AppDataSource } from "./data-source";
 
 const getAuditLogTitle = (auditLog: AuditLog) => {
 	switch (auditLog.action.type) {
@@ -227,7 +228,8 @@ const getAuditLogDNSBlocks = (
 
 export const checkLatestCloudflareLogs = async (app: App) => {
 	try {
-		const appConfigs = await AppConfig.find({
+		const appConfigRepository = AppDataSource.getRepository(AppConfig);
+		const appConfigs = await appConfigRepository.find({
 			where: {
 				cloudflareAuthEmail: Not(IsNull()),
 				cloudflareAuthKey: Not(IsNull()),
@@ -276,7 +278,7 @@ export const checkLatestCloudflareLogs = async (app: App) => {
 				}
 
 				appConfig.cloudflareLastCheckedAt = currentTime.toDate();
-				await appConfig.save();
+				await AppDataSource.manager.save(appConfig);
 			}
 		}
 	} catch (error: any) {

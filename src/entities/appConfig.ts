@@ -3,7 +3,6 @@ import {
 	Column,
 	CreateDateColumn,
 	UpdateDateColumn,
-	BaseEntity,
 	PrimaryGeneratedColumn,
 	BeforeInsert,
 	AfterInsert,
@@ -13,7 +12,7 @@ import {
 import CryptoJS from "crypto-js";
 
 @Entity()
-export class AppConfig extends BaseEntity {
+export class AppConfig {
 	@PrimaryGeneratedColumn()
 	id: number;
 
