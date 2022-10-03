@@ -19,8 +19,8 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@sentry/node": "7.0.0",
-		"@sentry/tracing": "7.0.0",
+		"@sentry/node": "7.14.1",
+		"@sentry/tracing": "7.14.1",
 		"@slack/bolt": "3.12.1",
 		"axios": "0.27.0",
 		"crypto-js": "4.1.1",
