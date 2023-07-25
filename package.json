@@ -29,7 +29,7 @@
 		"express-handlebars": "6.0.7",
 		"pg": "8.8.0",
 		"reflect-metadata": "0.1.13",
-		"typeorm": "0.2.41"
+		"typeorm": "0.3.10"
 	},
 	"devDependencies": {
 		"@types/crypto-js": "4.1.1",
