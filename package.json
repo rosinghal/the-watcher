@@ -11,7 +11,8 @@
 		"build": "yarn tailwind:prod && tsc --build && cp -r src/public src/views .build",
 		"prod": "node .build/app.js",
 		"tailwind:prod": "tailwindcss -i src/public/styles/tailwind.css -o src/public/styles/main.css",
-		"migrate:prod": "node ./node_modules/typeorm/cli.js migration:run"
+		"migrate:prod": "node ./node_modules/typeorm/cli.js migration:run",
+		"deploy": "caprover deploy --branch main --caproverName general-saas --caproverApp the-watcher"
 	},
 	"keywords": [],
 	"author": "",
