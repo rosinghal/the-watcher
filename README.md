@@ -14,4 +14,4 @@ Get CloudFlare audit logs directly to your Slack Workspace.
 ## Development
 1. Copy `.env.example` to `.env` and populate the variables.
 2. Run `yarn` and `yarn dev` to run the app.
-3. To test cron, run `yarn cron:dev`.
+3. To test cron, run http://localhost:3000/cron.

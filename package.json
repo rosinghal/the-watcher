@@ -5,13 +5,11 @@
 	"main": ".build/app.js",
 	"scripts": {
 		"dev": "nodemon -r dotenv/config --exec 'ts-node' src/app.ts",
-		"cron:dev": "ts-node -r dotenv/config src/cron.ts",
 		"migrate:dev": "ts-node -r dotenv/config ./node_modules/typeorm/cli.js migration:run",
 		"tailwind:dev": "tailwindcss -i src/public/styles/tailwind.css -o src/public/styles/main.css --watch",
 		"generate-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
 		"build": "yarn tailwind:prod && tsc --build && cp -r src/public src/views .build",
 		"prod": "node .build/app.js",
-		"cron:prod": "node .build/cron.js",
 		"tailwind:prod": "tailwindcss -i src/public/styles/tailwind.css -o src/public/styles/main.css",
 		"migrate:prod": "node ./node_modules/typeorm/cli.js migration:run"
 	},

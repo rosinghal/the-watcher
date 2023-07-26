@@ -8,8 +8,7 @@ import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import { engine } from "express-handlebars";
 import { authorizeFn } from "./controllers/auth";
-import { getAuditLogs } from "./controllers/cloudflare";
-import { checkLatestCloudflareLogs } from "./cron";
+import { getAuditLogs, checkLatestCloudflareLogs } from "./controllers/cloudflare";
 import { AppDataSource } from "./data-source";
 
 const expressReceiver = new ExpressReceiver({
